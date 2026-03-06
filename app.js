@@ -4,7 +4,7 @@ tg.expand();
 tg.setHeaderColor('#0a0f0a');
 tg.setBackgroundColor('#0a0f0a');
 
-const API_BASE = localStorage.getItem('api_base') || '';
+const API_BASE = 'https://flummoxedly-unpsychopathic-harley.ngrok-free.app';
 
 const PERIOD_MAP = {
     monthly: { label: 'мес.', months: 1 },
@@ -51,6 +51,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
         headers: {
             'Content-Type': 'application/json',
             'X-Telegram-Init-Data': tg.initData || '',
+            'ngrok-skip-browser-warning': 'true',
         },
     };
     if (body) opts.body = JSON.stringify(body);
