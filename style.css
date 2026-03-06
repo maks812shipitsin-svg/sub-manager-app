@@ -36,12 +36,69 @@ body {
 .header {
     padding: 24px 0 16px;
     text-align: center;
+    position: relative;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
 }
 
 .header-greeting {
     font-size: 14px;
     color: var(--text-dim);
-    margin-bottom: 8px;
+}
+
+.profile-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-dim), var(--neon));
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--neon-glow);
+    transition: transform 0.2s;
+}
+
+.avatar:active {
+    transform: scale(0.9);
+}
+
+.sync-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--neon);
+    opacity: 0;
+    transition: opacity 0.3s;
+    margin-top: 4px;
+}
+
+.sync-badge.visible {
+    opacity: 1;
+}
+
+.sync-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--neon);
+    box-shadow: var(--neon-glow);
 }
 
 .total-label {
@@ -528,6 +585,113 @@ select.input {
 
 .tab-content.active {
     display: block;
+}
+
+/* Profile Tab */
+.profile-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 28px 16px;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.profile-avatar-lg {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-dim), var(--neon));
+    color: #000;
+    font-size: 32px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+}
+
+.profile-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.profile-username {
+    font-size: 14px;
+    color: var(--neon);
+    margin-bottom: 4px;
+}
+
+.profile-joined {
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+.profile-stats, .profile-settings {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.stat-row, .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.stat-row:not(:last-child), .setting-row:not(:last-child) {
+    border-bottom: 1px solid var(--card-border);
+}
+
+.stat-row span:first-child, .setting-row span:first-child {
+    color: var(--text-dim);
+    font-size: 14px;
+}
+
+.stat-row-total {
+    margin-top: 4px;
+}
+
+.stat-row-total span:first-child {
+    font-weight: 600;
+    color: var(--text) !important;
+}
+
+.input-sm-select {
+    width: auto !important;
+    padding: 8px 28px 8px 12px !important;
+    font-size: 13px;
+    border-radius: 8px;
+}
+
+.profile-sync-info {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 20px 16px;
+    text-align: center;
+}
+
+.sync-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.sync-text {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.sync-last {
+    font-size: 11px;
+    color: var(--neon-dim);
 }
 
 /* Scrollbar */

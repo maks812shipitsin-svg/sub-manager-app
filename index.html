@@ -12,10 +12,18 @@
     <div id="app">
         <!-- Header -->
         <header class="header">
-            <div class="header-greeting" id="greeting"></div>
+            <div class="header-top">
+                <div class="header-greeting" id="greeting"></div>
+                <button class="profile-btn" id="profile-btn">
+                    <div class="avatar" id="avatar">?</div>
+                </button>
+            </div>
             <div class="header-total">
                 <span class="total-label">Расходы в месяц</span>
                 <span class="total-amount" id="total-monthly">—</span>
+            </div>
+            <div class="sync-badge" id="sync-badge">
+                <span class="sync-dot"></span> Синхронизировано
             </div>
         </header>
 
@@ -24,11 +32,11 @@
             <button class="tab active" data-tab="dashboard">Обзор</button>
             <button class="tab" data-tab="subscriptions">Подписки</button>
             <button class="tab" data-tab="payments">Платежи</button>
+            <button class="tab" data-tab="profile">Профиль</button>
         </nav>
 
         <!-- Dashboard Tab -->
         <section class="tab-content active" id="tab-dashboard">
-            <!-- Summary Cards -->
             <div class="cards-row">
                 <div class="card">
                     <div class="card-icon">📊</div>
@@ -47,13 +55,11 @@
                 </div>
             </div>
 
-            <!-- Chart -->
             <div class="chart-container">
                 <h3 class="section-title">Распределение расходов</h3>
                 <canvas id="pie-chart"></canvas>
             </div>
 
-            <!-- Yearly total -->
             <div class="yearly-block">
                 <div class="yearly-row">
                     <span>В месяц</span>
@@ -65,10 +71,8 @@
                 </div>
             </div>
 
-            <!-- Analogies -->
             <div class="analogies-block" id="analogies"></div>
 
-            <!-- Upcoming payments -->
             <div class="upcoming-block">
                 <h3 class="section-title">Ближайшие списания</h3>
                 <div id="upcoming-list"></div>
@@ -95,9 +99,67 @@
 
             <div class="list-header" style="margin-top: 16px;">
                 <h3 class="section-title">Бьюти-процедуры</h3>
+                <button class="btn-add" id="btn-add-beauty">+</button>
             </div>
             <div id="beauty-list" class="items-list"></div>
             <div class="list-total" id="pays-total"></div>
+        </section>
+
+        <!-- Profile Tab -->
+        <section class="tab-content" id="tab-profile">
+            <div class="profile-card">
+                <div class="profile-avatar-lg" id="profile-avatar-lg">?</div>
+                <div class="profile-name" id="profile-name">—</div>
+                <div class="profile-username" id="profile-username"></div>
+                <div class="profile-joined" id="profile-joined"></div>
+            </div>
+
+            <div class="profile-stats">
+                <h3 class="section-title">Статистика</h3>
+                <div class="stat-row">
+                    <span>Подписок</span>
+                    <span class="neon-text" id="profile-subs">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Платежей</span>
+                    <span class="neon-text" id="profile-pays">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Бьюти</span>
+                    <span class="neon-text" id="profile-beauty">0</span>
+                </div>
+                <div class="stat-row stat-row-total">
+                    <span>Итого в месяц</span>
+                    <span class="neon-text" id="profile-total-m">0 ₽</span>
+                </div>
+                <div class="stat-row stat-row-total">
+                    <span>Итого в год</span>
+                    <span class="neon-text" id="profile-total-y">0 ₽</span>
+                </div>
+            </div>
+
+            <div class="profile-settings">
+                <h3 class="section-title">Настройки</h3>
+                <div class="setting-row">
+                    <span>Валюта по умолчанию</span>
+                    <select id="pref-currency" class="input input-sm-select">
+                        <option value="RUB">₽ RUB</option>
+                        <option value="USD">$ USD</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <span>Курс USD</span>
+                    <span class="neon-text" id="profile-rate">—</span>
+                </div>
+            </div>
+
+            <div class="profile-sync-info">
+                <div class="sync-icon">🔄</div>
+                <div class="sync-text">
+                    Данные синхронизируются между ботом и приложением автоматически
+                </div>
+                <div class="sync-last" id="sync-last">—</div>
+            </div>
         </section>
 
         <!-- Add Modal -->

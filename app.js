@@ -5,6 +5,7 @@ tg.setHeaderColor('#0a0f0a');
 tg.setBackgroundColor('#0a0f0a');
 
 const API_BASE = 'https://flummoxedly-unpsychopathic-harley.ngrok-free.app';
+const SYNC_INTERVAL_MS = 15_000;
 
 const PERIOD_MAP = {
     monthly: { label: 'мес.', months: 1 },
@@ -22,24 +23,42 @@ const ANALOGIES = [
     { name: 'походов в бар', price: 3000, emoji: '🍺' },
 ];
 
-let allData = { subscriptions: [], payments: [], beauty: [], usd_rate: 90 };
+let allData = { subscriptions: [], payments: [], beauty: [], usd_rate: 90, profile: null };
+let profileData = null;
 let pieChart = null;
+let syncTimer = null;
+let lastSyncTime = null;
 
 // ── Init ──
 
 async function init() {
-    const user = tg.initDataUnsafe?.user;
-    const greeting = document.getElementById('greeting');
-    if (user?.first_name) {
-        greeting.textContent = `Привет, ${user.first_name}! 👋`;
-    } else {
-        greeting.textContent = 'Привет! 👋';
-    }
-
     setupTabs();
     setupModal();
-    await loadData();
+    setupProfile();
+
+    await Promise.all([loadData(), loadProfile()]);
+
+    updateHeader();
     document.getElementById('loading').classList.add('hidden');
+
+    startAutoSync();
+    setupVisibilitySync();
+}
+
+function updateHeader() {
+    const greeting = document.getElementById('greeting');
+    const avatar = document.getElementById('avatar');
+    const profileAvatarLg = document.getElementById('profile-avatar-lg');
+
+    const name = profileData?.profile?.first_name
+        || tg.initDataUnsafe?.user?.first_name
+        || 'Пользователь';
+
+    greeting.textContent = `Привет, ${name}! 👋`;
+
+    const initial = name.charAt(0).toUpperCase();
+    avatar.textContent = initial;
+    profileAvatarLg.textContent = initial;
 }
 
 // ── API ──
@@ -64,6 +83,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 async function loadData() {
     try {
         allData = await apiCall('/data');
+        showSyncBadge();
     } catch (e) {
         console.warn('API unavailable, using demo data');
         allData = getDemoData();
@@ -71,22 +91,67 @@ async function loadData() {
     render();
 }
 
+async function loadProfile() {
+    try {
+        profileData = await apiCall('/profile');
+        renderProfile();
+    } catch (e) {
+        console.warn('Profile unavailable');
+    }
+}
+
 function getDemoData() {
     return {
         subscriptions: [
             { id: 1, name: 'Яндекс Плюс', price: 299, currency: 'RUB', period: 'monthly', billing_day: 15 },
             { id: 2, name: 'ChatGPT Plus', price: 20, currency: 'USD', period: 'monthly', billing_day: 5 },
-            { id: 3, name: 'Spotify', price: 11, currency: 'USD', period: 'monthly', billing_day: 20 },
         ],
         payments: [
             { id: 4, name: 'Квартира', price: 35000, currency: 'RUB', period: 'monthly', billing_day: 1 },
-            { id: 5, name: 'Интернет', price: 800, currency: 'RUB', period: 'monthly', billing_day: 10 },
         ],
         beauty: [
             { id: 6, name: 'Маникюр', price: 3000, currency: 'RUB', period: 'monthly', billing_day: 12 },
         ],
         usd_rate: 90,
+        profile: null,
     };
+}
+
+// ── Auto-sync ──
+
+function startAutoSync() {
+    if (syncTimer) clearInterval(syncTimer);
+    syncTimer = setInterval(async () => {
+        await loadData();
+    }, SYNC_INTERVAL_MS);
+}
+
+function setupVisibilitySync() {
+    document.addEventListener('visibilitychange', async () => {
+        if (document.visibilityState === 'visible') {
+            await Promise.all([loadData(), loadProfile()]);
+            updateHeader();
+        }
+    });
+
+    try {
+        tg.onEvent('viewportChanged', async ({ isStateStable }) => {
+            if (isStateStable) {
+                await Promise.all([loadData(), loadProfile()]);
+                updateHeader();
+            }
+        });
+    } catch (e) { /* older clients */ }
+}
+
+function showSyncBadge() {
+    lastSyncTime = new Date();
+    const badge = document.getElementById('sync-badge');
+    badge.classList.add('visible');
+    setTimeout(() => badge.classList.remove('visible'), 2000);
+
+    const el = document.getElementById('sync-last');
+    if (el) el.textContent = `Последняя синхронизация: ${lastSyncTime.toLocaleTimeString('ru-RU')}`;
 }
 
 // ── Helpers ──
@@ -160,7 +225,6 @@ function renderChart(subs, pays, beauty) {
     }
 
     const ctx = document.getElementById('pie-chart').getContext('2d');
-
     if (pieChart) pieChart.destroy();
 
     pieChart = new Chart(ctx, {
@@ -279,6 +343,59 @@ function renderList(containerId, items, type) {
     }).join('');
 }
 
+// ── Profile ──
+
+function renderProfile() {
+    if (!profileData) return;
+    const p = profileData.profile || {};
+    const s = profileData.stats || {};
+
+    const fullName = [p.first_name, p.last_name].filter(Boolean).join(' ') || 'Пользователь';
+    document.getElementById('profile-name').textContent = fullName;
+    document.getElementById('profile-avatar-lg').textContent = (fullName.charAt(0) || '?').toUpperCase();
+
+    const usernameEl = document.getElementById('profile-username');
+    if (p.username) {
+        usernameEl.textContent = `@${p.username}`;
+    } else {
+        usernameEl.textContent = '';
+    }
+
+    if (p.joined_at) {
+        const d = new Date(p.joined_at);
+        document.getElementById('profile-joined').textContent =
+            `С нами с ${d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    }
+
+    document.getElementById('profile-subs').textContent = s.subscriptions_count ?? 0;
+    document.getElementById('profile-pays').textContent = s.payments_count ?? 0;
+    document.getElementById('profile-beauty').textContent = s.beauty_count ?? 0;
+    document.getElementById('profile-total-m').textContent = `${formatNum(s.total_monthly_rub || 0)} ₽`;
+    document.getElementById('profile-total-y').textContent = `${formatNum(s.total_yearly_rub || 0)} ₽`;
+    document.getElementById('profile-rate').textContent = `${(profileData.usd_rate || 0).toFixed(2)} ₽`;
+
+    const currSel = document.getElementById('pref-currency');
+    if (p.preferred_currency) currSel.value = p.preferred_currency;
+}
+
+function setupProfile() {
+    document.getElementById('profile-btn').addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector('[data-tab="profile"]').classList.add('active');
+        document.getElementById('tab-profile').classList.add('active');
+    });
+
+    document.getElementById('pref-currency').addEventListener('change', async (e) => {
+        try {
+            await apiCall('/set-currency', 'POST', { currency: e.target.value });
+            showSyncBadge();
+        } catch (err) {
+            console.warn('Failed to save currency preference');
+        }
+    });
+}
+
 // ── Actions ──
 
 async function deleteItem(id) {
@@ -324,6 +441,7 @@ async function saveItem() {
 
     closeModal();
     await loadData();
+    await loadProfile();
 }
 
 // ── Tabs ──
@@ -344,6 +462,7 @@ function setupTabs() {
 function setupModal() {
     document.getElementById('btn-add-sub').addEventListener('click', () => openModal('subscription'));
     document.getElementById('btn-add-pay').addEventListener('click', () => openModal('payment'));
+    document.getElementById('btn-add-beauty').addEventListener('click', () => openModal('beauty'));
     document.getElementById('modal-close').addEventListener('click', closeModal);
     document.getElementById('modal-overlay').addEventListener('click', (e) => {
         if (e.target === e.currentTarget) closeModal();
@@ -353,12 +472,16 @@ function setupModal() {
 
 function openModal(type) {
     document.getElementById('inp-type').value = type;
-    document.getElementById('modal-title').textContent =
-        type === 'subscription' ? 'Новая подписка' : 'Новый платёж';
+    const titles = {
+        subscription: 'Новая подписка',
+        payment: 'Новый платёж',
+        beauty: 'Бьюти-процедура',
+    };
+    document.getElementById('modal-title').textContent = titles[type] || 'Добавить';
     document.getElementById('inp-name').value = '';
     document.getElementById('inp-price').value = '';
     document.getElementById('inp-day').value = '';
-    document.getElementById('inp-currency').value = 'RUB';
+    document.getElementById('inp-currency').value = allData.profile?.preferred_currency || 'RUB';
     document.getElementById('inp-period').value = 'monthly';
     document.getElementById('modal-overlay').classList.add('show');
 }
