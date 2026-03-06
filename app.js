@@ -4,7 +4,7 @@ tg.expand();
 tg.setHeaderColor('#0a0f0a');
 tg.setBackgroundColor('#0a0f0a');
 
-const API_BASE = 'https://flummoxedly-unpsychopathic-harley.ngrok-free.app';
+const API_BASE = 'https://flummoxedly-unpsychopathic-harley.ngrok-free.dev';
 const SYNC_INTERVAL_MS = 15_000;
 
 const PERIOD_MAP = {
