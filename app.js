@@ -35,8 +35,10 @@ async function init() {
     setupTabs();
     setupModal();
     setupProfile();
+    setupEmailSection();
 
     await Promise.all([loadData(), loadProfile()]);
+    await loadEmailAccounts();
 
     updateHeader();
     document.getElementById('loading').classList.add('hidden');
@@ -377,6 +379,55 @@ function renderProfile() {
     if (p.preferred_currency) currSel.value = p.preferred_currency;
 }
 
+async function loadEmailAccounts() {
+    try {
+        const res = await apiCall('/email-accounts');
+        renderEmailAccounts(res.accounts || []);
+    } catch (e) {
+        document.getElementById('email-accounts-list').innerHTML = '<div class="empty-state">Не удалось загрузить</div>';
+    }
+}
+
+function renderEmailAccounts(accounts) {
+    const container = document.getElementById('email-accounts-list');
+    if (accounts.length === 0) {
+        container.innerHTML = '<div class="empty-state">Нет подключённых почт</div>';
+        return;
+    }
+    container.innerHTML = accounts.map(a => `
+        <div class="email-item">
+            <span class="email-addr">${a.email}</span>
+            <button class="btn-delete btn-delete-sm" onclick="deleteEmail(${a.id})" title="Удалить">🗑</button>
+        </div>
+    `).join('');
+}
+
+async function deleteEmail(id) {
+    if (!confirm('Удалить эту почту?')) return;
+    try {
+        await apiCall(`/email-accounts/${id}/delete`, 'POST');
+        await loadEmailAccounts();
+    } catch (e) {
+        tg.showAlert('Ошибка удаления');
+    }
+}
+
+function setupEmailSection() {
+    document.getElementById('btn-add-email').addEventListener('click', async () => {
+        try {
+            const res = await apiCall('/gmail-auth-url');
+            if (res.url) {
+                window.open(res.url, '_blank');
+                tg.showAlert('Откройте вкладку с Google и авторизуйтесь. После — обновите приложение.');
+            } else {
+                tg.showAlert('Подключение Gmail не настроено');
+            }
+        } catch (e) {
+            tg.showAlert('Ошибка');
+        }
+    });
+}
+
 function setupProfile() {
     document.getElementById('profile-btn').addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -452,6 +503,7 @@ function setupTabs() {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             tab.classList.add('active');
             document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+            if (tab.dataset.tab === 'profile') loadEmailAccounts();
         });
     });
 }

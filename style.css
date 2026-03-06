@@ -669,6 +669,65 @@ select.input {
     border-radius: 8px;
 }
 
+.profile-email-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.profile-email-section .section-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 4px 0 12px;
+}
+
+.email-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.email-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: rgba(57, 255, 20, 0.08);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+}
+
+.email-addr {
+    font-size: 14px;
+    color: var(--text);
+    word-break: break-all;
+}
+
+.btn-add-email {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--neon-dim), var(--neon));
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-add-email:active {
+    transform: scale(0.98);
+}
+
+.btn-delete-sm {
+    padding: 6px 10px;
+    font-size: 14px;
+}
+
 .profile-sync-info {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
