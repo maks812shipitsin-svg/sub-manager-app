@@ -85,8 +85,7 @@ async function loadData() {
         allData = await apiCall('/data');
         showSyncBadge();
     } catch (e) {
-        console.warn('API unavailable, using demo data');
-        allData = getDemoData();
+        console.warn('API unavailable:', e.message);
     }
     render();
 }
