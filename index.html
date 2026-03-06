@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SubManager</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-greeting" id="greeting"></div>
+            <div class="header-total">
+                <span class="total-label">Расходы в месяц</span>
+                <span class="total-amount" id="total-monthly">—</span>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <nav class="tabs">
+            <button class="tab active" data-tab="dashboard">Обзор</button>
+            <button class="tab" data-tab="subscriptions">Подписки</button>
+            <button class="tab" data-tab="payments">Платежи</button>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <section class="tab-content active" id="tab-dashboard">
+            <!-- Summary Cards -->
+            <div class="cards-row">
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-value" id="subs-count">0</div>
+                    <div class="card-label">Подписок</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🏠</div>
+                    <div class="card-value" id="pays-count">0</div>
+                    <div class="card-label">Платежей</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💅</div>
+                    <div class="card-value" id="beauty-count">0</div>
+                    <div class="card-label">Бьюти</div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-container">
+                <h3 class="section-title">Распределение расходов</h3>
+                <canvas id="pie-chart"></canvas>
+            </div>
+
+            <!-- Yearly total -->
+            <div class="yearly-block">
+                <div class="yearly-row">
+                    <span>В месяц</span>
+                    <span class="neon-text" id="monthly-sum">0 ₽</span>
+                </div>
+                <div class="yearly-row">
+                    <span>В год</span>
+                    <span class="neon-text" id="yearly-sum">0 ₽</span>
+                </div>
+            </div>
+
+            <!-- Analogies -->
+            <div class="analogies-block" id="analogies"></div>
+
+            <!-- Upcoming payments -->
+            <div class="upcoming-block">
+                <h3 class="section-title">Ближайшие списания</h3>
+                <div id="upcoming-list"></div>
+            </div>
+        </section>
+
+        <!-- Subscriptions Tab -->
+        <section class="tab-content" id="tab-subscriptions">
+            <div class="list-header">
+                <h3 class="section-title">Мои подписки</h3>
+                <button class="btn-add" id="btn-add-sub">+</button>
+            </div>
+            <div id="subs-list" class="items-list"></div>
+            <div class="list-total" id="subs-total"></div>
+        </section>
+
+        <!-- Payments Tab -->
+        <section class="tab-content" id="tab-payments">
+            <div class="list-header">
+                <h3 class="section-title">Регулярные платежи</h3>
+                <button class="btn-add" id="btn-add-pay">+</button>
+            </div>
+            <div id="pays-list" class="items-list"></div>
+
+            <div class="list-header" style="margin-top: 16px;">
+                <h3 class="section-title">Бьюти-процедуры</h3>
+            </div>
+            <div id="beauty-list" class="items-list"></div>
+            <div class="list-total" id="pays-total"></div>
+        </section>
+
+        <!-- Add Modal -->
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 id="modal-title">Добавить</h3>
+                    <button class="modal-close" id="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="inp-name" placeholder="Название" class="input">
+                    <div class="input-row">
+                        <input type="number" id="inp-price" placeholder="Сумма" class="input" inputmode="decimal">
+                        <select id="inp-currency" class="input input-sm">
+                            <option value="RUB">₽</option>
+                            <option value="USD">$</option>
+                        </select>
+                    </div>
+                    <select id="inp-period" class="input">
+                        <option value="monthly">Ежемесячно</option>
+                        <option value="quarterly">Раз в 3 месяца</option>
+                        <option value="semiannual">Раз в 6 месяцев</option>
+                        <option value="yearly">Ежегодно</option>
+                    </select>
+                    <input type="number" id="inp-day" placeholder="День списания (1-31)" class="input" min="1" max="31" inputmode="numeric">
+                    <input type="hidden" id="inp-type" value="subscription">
+                </div>
+                <button class="btn-confirm" id="btn-save">Сохранить</button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
